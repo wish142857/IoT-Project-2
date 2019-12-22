@@ -12,68 +12,48 @@ public class AudioRecordFunc {
     // 缓冲区字节大小
     private int bufferSizeInBytes = 0;
 
-    //AudioName裸音频数据文件 ，麦克风
-    private String AudioName = "";
-
-    //NewAudioName可播放的音频文件
-    private String NewAudioName = "";
-
+    private String rawAudioName = "";       // 裸音频数据文件
+    private String ripeAudioName = "";      // 可播放音频文件
     private AudioRecord audioRecord;
-    private boolean isRecord = false;// 设置正在录制的状态
-
-
+    private boolean isRecord = false;   // 设置正在录制的状态
     private static AudioRecordFunc mInstance;
 
     private AudioRecordFunc(){
-
     }
 
-    public synchronized static AudioRecordFunc getInstance()
-    {
+    /********************
+     * 获取实例
+     ********************/
+    public synchronized static AudioRecordFunc getInstance() {
         if(mInstance == null)
             mInstance = new AudioRecordFunc();
         return mInstance;
     }
 
+    /********************
+     * 开始录音与文件储存
+     ********************/
     public int startRecordAndFile() {
-        //判断是否有外部存储设备sdcard
-        if(AudioFileFunc.isSdcardExit())
-        {
-            if(isRecord)
-            {
+        //判断是否有外部存储设备 sdcard
+        if(AudioFileFunc.isSdcardExit()) {
+            if (isRecord)
                 return ErrorCode.E_STATE_RECODING;
-            }
-            else
-            {
-                if(audioRecord == null)
-                    creatAudioRecord();
-                audioRecord.startRecording();
-                // 让录制状态为true
-                isRecord = true;
-                // 开启音频文件写入线程
-                new Thread(new AudioRecordThread()).start();
-                return ErrorCode.SUCCESS;
-            }
-
+            if(audioRecord == null)
+                creatAudioRecord();
+            audioRecord.startRecording();
+            isRecord = true;
+            new Thread(new AudioRecordThread()).start();
+            return ErrorCode.SUCCESS;
         }
-        else
-        {
+        else {
             return ErrorCode.E_NOSDCARD;
         }
-
     }
 
+    /********************
+     * 停止录音与文件储存
+     ********************/
     public void stopRecordAndFile() {
-        close();
-    }
-
-
-    public long getRecordFileSize(){
-        return AudioFileFunc.getFileSize(NewAudioName);
-    }
-
-
-    private void close() {
         if (audioRecord != null) {
             System.out.println("stopRecord");
             isRecord = false;//停止文件写入
@@ -83,11 +63,20 @@ public class AudioRecordFunc {
         }
     }
 
+    /********************
+     * 获取录音文件大小
+     ********************/
+    public long getRecordFileSize(){
+        return AudioFileFunc.getFileSize(ripeAudioName);
+    }
 
+    /********************
+     * 创建录音记录
+     ********************/
     private void creatAudioRecord() {
         // 获取音频文件路径
-        AudioName = AudioFileFunc.getRawFilePath();
-        NewAudioName = AudioFileFunc.getWavFilePath();
+        rawAudioName = AudioFileFunc.getRawFilePath();
+        ripeAudioName = AudioFileFunc.getWavFilePath();
 
         // 获得缓冲区字节大小
         bufferSizeInBytes = AudioRecord.getMinBufferSize(AudioFileFunc.AUDIO_SAMPLE_RATE,
@@ -99,12 +88,14 @@ public class AudioRecordFunc {
 
     }
 
-
+    /********************
+     * 录音记录线程
+     ********************/
     class AudioRecordThread implements Runnable {
         @Override
         public void run() {
-            writeDateTOFile();//往文件中写入裸数据
-            copyWaveFile(AudioName, NewAudioName);//给裸数据加上头文件
+            writeDateTOFile();                              // 往文件中写入裸数据
+            formatWaveFile(rawAudioName, ripeAudioName);    // 格式化裸数据格式
         }
     }
 
@@ -119,15 +110,15 @@ public class AudioRecordFunc {
         FileOutputStream fos = null;
         int readsize = 0;
         try {
-            File file = new File(AudioName);
+            File file = new File(rawAudioName);
             if (file.exists()) {
                 file.delete();
             }
-            fos = new FileOutputStream(file);// 建立一个可存取字节的文件
+            fos = new FileOutputStream(file);   // 建立一个可存取字节的文件
         } catch (Exception e) {
             e.printStackTrace();
         }
-        while (isRecord == true) {
+        while (isRecord) {
             readsize = audioRecord.read(audiodata, 0, bufferSizeInBytes);
             if (AudioRecord.ERROR_INVALID_OPERATION != readsize && fos!=null) {
                 try {
@@ -145,8 +136,10 @@ public class AudioRecordFunc {
         }
     }
 
-    // 这里得到可播放的音频文件
-    private void copyWaveFile(String inFilename, String outFilename) {
+    /********************
+     * 格式化 wav 格式文件
+     ********************/
+    private void formatWaveFile(String inFilename, String outFilename) {
         FileInputStream in = null;
         FileOutputStream out = null;
         long totalAudioLen = 0;
@@ -174,15 +167,11 @@ public class AudioRecordFunc {
         }
     }
 
-    /**
-     * 这里提供一个头信息。插入这些信息就可以得到可以播放的文件。
-     * 为我为啥插入这44个字节，这个还真没深入研究，不过你随便打开一个wav
-     * 音频的文件，可以发现前面的头文件可以说基本一样哦。每种格式的文件都有
-     * 自己特有的头文件。
-     */
-    private void WriteWaveFileHeader(FileOutputStream out, long totalAudioLen,
-                                     long totalDataLen, long longSampleRate, int channels, long byteRate)
-            throws IOException {
+    /********************
+     * 写入 wav 格式文件头
+     ********************/
+    private void WriteWaveFileHeader(FileOutputStream out, long totalAudioLen, long totalDataLen, long longSampleRate, int channels, long byteRate)
+    throws IOException {
         byte[] header = new byte[44];
         header[0] = 'R'; // RIFF/WAVE header
         header[1] = 'I';
