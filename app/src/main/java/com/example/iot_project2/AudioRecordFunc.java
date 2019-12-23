@@ -17,11 +17,13 @@ public class AudioRecordFunc {
     private boolean isRecord = false;       // 是否正在录制
     private AudioRecord audioRecord;
     private static AudioRecordFunc mInstance;
+    private Receiver receiver;
 
     /********************
      * 构造方法
      ********************/
-    private AudioRecordFunc(){
+    private AudioRecordFunc() {
+        receiver = new Receiver();
     }
 
     /********************
@@ -119,11 +121,38 @@ public class AudioRecordFunc {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        boolean found_signal = false; // 是否已经找到信号
+        int tail = 0;
+
         while (isRecord) {
             readsize = audioRecord.read(audiodata, 0, bufferSizeInBytes);
-            if (AudioRecord.ERROR_INVALID_OPERATION != readsize && fos!=null) {
+            if (AudioRecord.ERROR_INVALID_OPERATION != readsize &&
+                    readsize != AudioRecord.ERROR_BAD_VALUE && readsize != 0 &&
+                    readsize != -1 && fos!=null) {
                 try {
                     // TODO 对数据进行处理
+                    double[] input = receiver.convert_and_filter(audiodata, readsize);
+                    int start_position;
+                    if (found_signal) {
+                        start_position = 2 * Configuration.SampleNum - tail;
+                    } else {
+                        start_position = receiver.find_start_position(input);
+                        if (start_position > 0) {
+                            found_signal = true;
+                        }
+                    }
+                    if (start_position > 0) {
+                        while  (start_position + Configuration.SampleNum * 2 <= input.length) {
+                            double distance = receiver.calculate_distance(input, start_position);
+                            // TODO 绘图
+
+                            start_position += Configuration.SampleNum * 2;
+                        }
+                        tail = input.length - start_position;
+
+                    }
+
                     fos.write(audiodata);
 
 
@@ -174,7 +203,7 @@ public class AudioRecordFunc {
     /********************
      * 写入 wav 格式文件头
      ********************/
-    private void WriteWaveFileHeader(FileOutputStream out, long totalAudioLen, long totalDataLen, long longSampleRate, int channels, long byteRate)
+    public static void WriteWaveFileHeader(FileOutputStream out, long totalAudioLen, long totalDataLen, long longSampleRate, int channels, long byteRate)
     throws IOException {
         byte[] header = new byte[44];
         header[0] = 'R'; // RIFF/WAVE header

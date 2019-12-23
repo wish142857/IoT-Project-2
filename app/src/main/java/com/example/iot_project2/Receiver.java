@@ -3,14 +3,14 @@ package com.example.iot_project2;
 public class Receiver {
     private BandPassFilter bandPassFilter;
     private FMCW fmcw;
-    private double[] filtered_sound;
+    // private double[] filtered_sound;
 
     public Receiver() {
         bandPassFilter = new BandPassFilter(Configuration.BandPassCenter, Configuration.BandPassOffset, Configuration.SamplingRate);
         fmcw = new FMCW(Configuration.SamplingRate, Configuration.T, Configuration.StartFreq, Configuration.EndFreq);
     }
 
-    public void convert_and_filter(byte[] buffer, int byte_num) {
+    public double[] convert_and_filter(byte[] buffer, int byte_num) {
         double[] doubles = new double[byte_num / 2];
         for (int i = 0; i < doubles.length; i++) {
             byte bl = buffer[2 * i];
@@ -19,18 +19,18 @@ public class Receiver {
             short s = (short) ((bh & 0x00FF) << 8 | bl & 0x00FF);
             doubles[i] = s / 32768f;
         }
-        filtered_sound = bandPassFilter.filter(doubles);
+        return bandPassFilter.filter(doubles);
     }
 
-    public void convert_and_filter(byte[] buffer) {
-        convert_and_filter(buffer, buffer.length);
+    public double[] convert_and_filter(byte[] buffer) {
+        return convert_and_filter(buffer, buffer.length);
     }
 
-    public double calculate_distance(int start_pos) {
-        return fmcw.delta_dis(filtered_sound, start_pos);
+    public double calculate_distance(double[] input, int start_pos) {
+        return fmcw.delta_dis(input, start_pos);
     }
 
-    public static double[] xcorr(double[] input, double[] target) {
+    public double[] xcorr(double[] input, double[] target) {
         double[] xcorr_result = new double[input.length];
         for (int i = 0; i < input.length; ++i) {
             xcorr_result[i] = 0;
@@ -41,7 +41,7 @@ public class Receiver {
         return xcorr_result;
     }
 
-    public static int find_start_position(double[] input) {
+    public int find_start_position(double[] input) {
         double[] t = new double[Configuration.SampleNum];
         for (int i = 0; i < Configuration.SampleNum; i++) t[i] = ((double)i / Configuration.SamplingRate);
         double[] chirp = Chirp.chirp(t, Configuration.StartFreq, Configuration.T, Configuration.EndFreq);
