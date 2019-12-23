@@ -17,13 +17,13 @@ public class LineChartManager {
         uiHandler.sendMessage(msg);
     }
 
-    static void updateLineChart() {
+    static void updateLineChart(double movement) {
         if (uiHandler == null)
             return;
         Message msg = new Message();
         Bundle b = new Bundle();
         b.putInt("cmd",MainActivity.CMD_CHART_UPDATE);
-        b.putInt("msg", 0);
+        b.putDouble("msg", movement);
         msg.setData(b);
         uiHandler.sendMessage(msg);
     }
