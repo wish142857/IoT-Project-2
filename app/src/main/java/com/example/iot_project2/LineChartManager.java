@@ -27,5 +27,4 @@ public class LineChartManager {
         msg.setData(b);
         uiHandler.sendMessage(msg);
     }
-
 }

@@ -4,18 +4,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;
-import android.os.Bundle;
-import android.os.Message;
 import android.util.Log;
-
-import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
 
 
 public class AudioRecordFunc {
