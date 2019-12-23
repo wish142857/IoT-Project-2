@@ -5,17 +5,27 @@ import android.os.Message;
 
 public class LineChartManager {
     static MainActivity.UIHandler uiHandler;
-    private final static int CMD_CHART_UPDATE = 2005;
 
-    static boolean initLineChart() {
+    static void initLineChart() {
         if (uiHandler == null)
-            return false;
+            return;
         Message msg = new Message();
         Bundle b = new Bundle();
-        b.putInt("cmd",CMD_CHART_UPDATE);
+        b.putInt("cmd",MainActivity.CMD_CHART_INIT);
         b.putInt("msg", 0);
         msg.setData(b);
         uiHandler.sendMessage(msg);
-        return true;
     }
+
+    static void updateLineChart() {
+        if (uiHandler == null)
+            return;
+        Message msg = new Message();
+        Bundle b = new Bundle();
+        b.putInt("cmd",MainActivity.CMD_CHART_UPDATE);
+        b.putInt("msg", 0);
+        msg.setData(b);
+        uiHandler.sendMessage(msg);
+    }
+
 }
