@@ -29,18 +29,10 @@ public class MainActivity extends Activity {
     private LineChart lineChart;
     private UIHandler uiHandler;
     private UIThread uiThread;
-    private LineData lineData;
-    private int index;
 
-    public void update() {
-        Toast.makeText(MainActivity.this,"FUCK" ,Toast.LENGTH_SHORT).show();
-        lineData.addEntry(new Entry(index, (float) (Math.random() * 80)), 0);
-        // lineChart.setData(lineData);
-        lineData.notifyDataChanged();
-        lineChart.notifyDataSetChanged();
-        lineChart.invalidate();
-        index ++;
-    }
+    private LineData lineData;           // 折线图数据
+    private int index;                   // 折线图点索引
+    private double loaction;             // 当前位置
 
     /********************
      *  初始化创建
@@ -60,12 +52,7 @@ public class MainActivity extends Activity {
         btn_stop.setOnClickListener(btn_stop_clickListener);
         btn_play.setOnClickListener(btn_stop_playListener);
         // 初始化
-        index = 0;
-        ArrayList<Entry> list = new ArrayList<>();
-        lineData = new LineData(new LineDataSet(list, "Label"));
-        lineChart.setData(lineData);
-        lineChart.notifyDataSetChanged();
-        lineChart.invalidate();
+        initLineChart();
         uiHandler = new UIHandler();
         LineChartManager.uiHandler = uiHandler;
         // 权限申请
@@ -81,7 +68,7 @@ public class MainActivity extends Activity {
      ********************/
     private Button.OnClickListener btn_record_clickListener = new Button.OnClickListener(){
         public void onClick(View v){
-            LineChartManager.initLineChart();
+            LineChartManager.updateLineChart();
             record();
         }
     };
@@ -91,6 +78,7 @@ public class MainActivity extends Activity {
      ********************/
     private Button.OnClickListener btn_stop_clickListener = new Button.OnClickListener(){
         public void onClick(View v){
+            LineChartManager.initLineChart();
             stop();
         }
     };
@@ -227,14 +215,46 @@ public class MainActivity extends Activity {
     }
 
     /********************
+     *  初始化折线图
+     ********************/
+    private void initLineChart() {
+        Toast.makeText(MainActivity.this,"INIT" ,Toast.LENGTH_SHORT).show();
+        lineChart.clear();
+        ArrayList<Entry> list = new ArrayList<>();
+        LineDataSet lineDataSet = new LineDataSet(list, "Label");
+        lineDataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        lineData = new LineData(lineDataSet);
+        lineChart.setData(lineData);
+        lineData.notifyDataChanged();
+        lineChart.notifyDataSetChanged();
+        lineChart.invalidate();
+        index = 0;
+        loaction = 0;
+    }
+
+    /********************
+     *  更新折线图
+     ********************/
+    public void updateLineChart(double movement) {
+        Toast.makeText(MainActivity.this,"UPDATE" ,Toast.LENGTH_SHORT).show();
+        lineData.addEntry(new Entry(index, (float) (Math.random() * 80)), 0);
+        lineData.notifyDataChanged();
+        lineChart.notifyDataSetChanged();
+        lineChart.invalidate();
+        index ++;
+        loaction += movement;
+    }
+
+    /********************
      * UI 处理
      ********************/
-    private final static int CMD_RECORDING_TIME = 2000;
-    private final static int CMD_PLAY_TIME = 2001;
-    private final static int CMD_STOP = 2002;
-    private final static int CMD_RECORDFAIL = 2003;
-    private final static int CMD_PLAYFAIL = 2004;
-    private final static int CMD_CHART_UPDATE = 2005;
+    public final static int CMD_RECORDING_TIME = 2000;
+    public final static int CMD_PLAY_TIME = 2001;
+    public final static int CMD_STOP = 2002;
+    public final static int CMD_RECORDFAIL = 2003;
+    public final static int CMD_PLAYFAIL = 2004;
+    public final static int CMD_CHART_INIT = 2005;
+    public final static int CMD_CHART_UPDATE = 2006;
     class UIHandler extends Handler {
         private UIHandler() {
         }
@@ -267,8 +287,12 @@ public class MainActivity extends Activity {
                         MainActivity.this.txt_info.setText("【播放完毕】播放文件:" + AudioFileFunc.getWavFilePath()+"\n文件大小：" + mSize + "字节");
                     }
                     break;
+                case CMD_CHART_INIT:
+                    initLineChart();
+                    break;
                 case CMD_CHART_UPDATE:
-                    update();
+                    double vMovement = b.getDouble("msg");
+                    updateLineChart(vMovement);
                     break;
                 default:
                     int vErrorCode = b.getInt("msg");
