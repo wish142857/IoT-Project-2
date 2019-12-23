@@ -1,5 +1,7 @@
 package com.example.iot_project2;
 
+import java.util.List;
+import java.util.ArrayList;
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
@@ -13,14 +15,32 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.core.app.ActivityCompat;
 
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+
 public class MainActivity extends Activity {
     private final int isWaiting = -1;     // 正在等待
     private final int isRecording = 0;    // 正在录制
     private final int isPlaying = 1;      // 正在播放
     private int mState = isWaiting;       // 当前状态
     private TextView txt_info;
+    private LineChart lineChart;
     private UIHandler uiHandler;
     private UIThread uiThread;
+    private LineData lineData;
+    private int index;
+
+    public void update() {
+        Toast.makeText(MainActivity.this,"FUCK" ,Toast.LENGTH_SHORT).show();
+        lineData.addEntry(new Entry(index, (float) (Math.random() * 80)), 0);
+        // lineChart.setData(lineData);
+        lineData.notifyDataChanged();
+        lineChart.notifyDataSetChanged();
+        lineChart.invalidate();
+        index ++;
+    }
 
     /********************
      *  初始化创建
@@ -34,12 +54,20 @@ public class MainActivity extends Activity {
         Button btn_stop = this.findViewById(R.id.btn_stop);
         Button btn_play = this.findViewById(R.id.btn_play);
         txt_info = this.findViewById(R.id.txt_info);
+        lineChart = findViewById(R.id.chart);
         // 设置监听
         btn_record.setOnClickListener(btn_record_clickListener);
         btn_stop.setOnClickListener(btn_stop_clickListener);
         btn_play.setOnClickListener(btn_stop_playListener);
         // 初始化
+        index = 0;
+        ArrayList<Entry> list = new ArrayList<>();
+        lineData = new LineData(new LineDataSet(list, "Label"));
+        lineChart.setData(lineData);
+        lineChart.notifyDataSetChanged();
+        lineChart.invalidate();
         uiHandler = new UIHandler();
+        LineChartManager.uiHandler = uiHandler;
         // 权限申请
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)!= PackageManager.PERMISSION_GRANTED
                 || ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED
@@ -48,12 +76,12 @@ public class MainActivity extends Activity {
         }
     }
 
-
     /********************
      * 录音按钮监听
      ********************/
     private Button.OnClickListener btn_record_clickListener = new Button.OnClickListener(){
         public void onClick(View v){
+            LineChartManager.initLineChart();
             record();
         }
     };
@@ -206,6 +234,7 @@ public class MainActivity extends Activity {
     private final static int CMD_STOP = 2002;
     private final static int CMD_RECORDFAIL = 2003;
     private final static int CMD_PLAYFAIL = 2004;
+    private final static int CMD_CHART_UPDATE = 2005;
     class UIHandler extends Handler {
         private UIHandler() {
         }
@@ -237,6 +266,9 @@ public class MainActivity extends Activity {
                         long mSize = mRecord.getRecordFileSize();
                         MainActivity.this.txt_info.setText("【播放完毕】播放文件:" + AudioFileFunc.getWavFilePath()+"\n文件大小：" + mSize + "字节");
                     }
+                    break;
+                case CMD_CHART_UPDATE:
+                    update();
                     break;
                 default:
                     int vErrorCode = b.getInt("msg");
