@@ -57,6 +57,13 @@ public class AudioPlayFunc {
                 return ErrorCode.E_STATE_RECODING;
             loadAudioFile();
             mediaPlayer.start();
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer arg0) {
+                    mediaPlayer.start();
+                    mediaPlayer.setLooping(true);
+                }
+            });
             isPlay = true;
             return ErrorCode.SUCCESS;
         }
