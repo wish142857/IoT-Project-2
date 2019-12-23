@@ -1,10 +1,16 @@
 <resources>
     <string name="app_name">IOT-project2</string>
-    <string name="hello_world">测试AudioRecord，实现录音功能</string>
-    <string name="view_record_wav">录音WAV文件</string>
+    <string name="hello_world">感知与定位</string>
 
+
+    <string name="info_recording">【正在录音】已录制：%1$d s</string>
+    <string name="info_playing">【正在播放】播放文件：%1$s\n文件大小：%2$d 字节</string>
+    <string name="info_record_over">【录音完毕】录音文件：%1$s\n文件大小：%2$d 字节</string>
+    <string name="info_play_over">【播放完毕】播放文件：%1$s\n文件大小：%2$d 字节</string>
     <string name="error_no_sdcard">没有SD卡，无法存储录音数据</string>
     <string name="error_state_record">正在录音中，请先停止录音</string>
     <string name="error_state_play">正在播放中，请先停止播放</string>
     <string name="error_unknown">未知错误</string>
+
+
 </resources>

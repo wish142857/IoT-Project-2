@@ -1,6 +1,5 @@
 package com.example.iot_project2;
 
-import java.util.List;
 import java.util.ArrayList;
 import android.Manifest;
 import android.app.Activity;
@@ -59,7 +58,7 @@ public class MainActivity extends Activity {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)!= PackageManager.PERMISSION_GRANTED
                 || ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED
                 || ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
         }
     }
 
@@ -68,7 +67,6 @@ public class MainActivity extends Activity {
      ********************/
     private Button.OnClickListener btn_record_clickListener = new Button.OnClickListener(){
         public void onClick(View v){
-            LineChartManager.updateLineChart();
             record();
         }
     };
@@ -78,7 +76,6 @@ public class MainActivity extends Activity {
      ********************/
     private Button.OnClickListener btn_stop_clickListener = new Button.OnClickListener(){
         public void onClick(View v){
-            LineChartManager.initLineChart();
             stop();
         }
     };
@@ -268,23 +265,23 @@ public class MainActivity extends Activity {
             {
                 case CMD_RECORDING_TIME:
                     int vTime = b.getInt("msg");
-                    MainActivity.this.txt_info.setText("【正在录音】已录制："+ vTime +" s");
+                    MainActivity.this.txt_info.setText(String.format(getResources().getString(R.string.info_recording), vTime));
                     break;
                 case CMD_PLAY_TIME:
                     AudioRecordFunc mRecord_ = AudioRecordFunc.getInstance();
                     long mSize_ = mRecord_.getRecordFileSize();
-                    MainActivity.this.txt_info.setText("【正在播放】播放文件:" + AudioFileFunc.getWavFilePath()+"\n文件大小：" + mSize_ + "字节");
+                    MainActivity.this.txt_info.setText(String.format(getResources().getString(R.string.info_playing), AudioFileFunc.getWavFilePath(), mSize_));
                     break;
                 case CMD_STOP:
                     int vType = b.getInt("msg");
                     if (vType == isRecording) {
                         AudioRecordFunc mRecord = AudioRecordFunc.getInstance();
                         long mSize = mRecord.getRecordFileSize();
-                        MainActivity.this.txt_info.setText("【录音完毕】录音文件:" + AudioFileFunc.getWavFilePath()+"\n文件大小：" + mSize + "字节");
+                        MainActivity.this.txt_info.setText(String.format(getResources().getString(R.string.info_record_over), AudioFileFunc.getWavFilePath(), mSize));
                     } else if (vType == isPlaying) {
                         AudioRecordFunc mRecord = AudioRecordFunc.getInstance();
                         long mSize = mRecord.getRecordFileSize();
-                        MainActivity.this.txt_info.setText("【播放完毕】播放文件:" + AudioFileFunc.getWavFilePath()+"\n文件大小：" + mSize + "字节");
+                        MainActivity.this.txt_info.setText(String.format(getResources().getString(R.string.info_play_over), AudioFileFunc.getWavFilePath(), mSize));
                     }
                     break;
                 case CMD_CHART_INIT:
