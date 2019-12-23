@@ -10,7 +10,7 @@
         android:id="@+id/txt_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello Java!"
+        android:text="准备就绪！"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.491"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -22,8 +22,8 @@
         android:id="@+id/btn_record"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="80dp"
-        android:layout_marginLeft="80dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginLeft="36dp"
         android:layout_marginTop="428dp"
         android:text="录音"
         app:layout_constraintStart_toStartOf="parent"
@@ -34,9 +34,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="428dp"
-        android:layout_marginEnd="80dp"
-        android:layout_marginRight="80dp"
         android:text="停止"
+        app:layout_constraintEnd_toEndOf="@+id/btn_play"
+        app:layout_constraintHorizontal_bias="0.575"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btn_play"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="428dp"
+        android:layout_marginEnd="36dp"
+        android:layout_marginRight="36dp"
+        android:text="播放"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

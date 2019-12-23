@@ -1,23 +1,26 @@
 package com.example.iot_project2;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;
+import android.util.Log;
 
 public class AudioRecordFunc {
-    // 缓冲区字节大小
-    private int bufferSizeInBytes = 0;
 
-    private String rawAudioName = "";       // 裸音频数据文件
-    private String ripeAudioName = "";      // 可播放音频文件
+    private int bufferSizeInBytes = 0;      // 缓冲区字节大小
+    private String rawAudioName = "";       // 裸音频数据文件名
+    private String ripeAudioName = "";      // 可播放音频文件名
+    private boolean isRecord = false;       // 是否正在录制
     private AudioRecord audioRecord;
-    private boolean isRecord = false;   // 设置正在录制的状态
     private static AudioRecordFunc mInstance;
 
+    /********************
+     * 构造方法
+     ********************/
     private AudioRecordFunc(){
     }
 
@@ -31,10 +34,27 @@ public class AudioRecordFunc {
     }
 
     /********************
+     * 创建音频记录
+     ********************/
+    private void creatAudioRecord() {
+        // 获取音频文件路径
+        rawAudioName = AudioFileFunc.getRawFilePath();
+        ripeAudioName = AudioFileFunc.getWavFilePath();
+
+        // 获得缓冲区字节大小
+        bufferSizeInBytes = AudioRecord.getMinBufferSize(AudioFileFunc.AUDIO_SAMPLE_RATE,
+                AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT);
+
+        // 创建AudioRecord对象
+        audioRecord = new AudioRecord(AudioFileFunc.AUDIO_INPUT, AudioFileFunc.AUDIO_SAMPLE_RATE,
+                AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT, bufferSizeInBytes);
+
+    }
+
+    /********************
      * 开始录音与文件储存
      ********************/
     public int startRecordAndFile() {
-        //判断是否有外部存储设备 sdcard
         if(AudioFileFunc.isSdcardExit()) {
             if (isRecord)
                 return ErrorCode.E_STATE_RECODING;
@@ -55,7 +75,7 @@ public class AudioRecordFunc {
      ********************/
     public void stopRecordAndFile() {
         if (audioRecord != null) {
-            System.out.println("stopRecord");
+            System.out.println("@ stopRecord");
             isRecord = false;//停止文件写入
             audioRecord.stop();
             audioRecord.release();//释放资源
@@ -67,25 +87,8 @@ public class AudioRecordFunc {
      * 获取录音文件大小
      ********************/
     public long getRecordFileSize(){
-        return AudioFileFunc.getFileSize(ripeAudioName);
-    }
-
-    /********************
-     * 创建录音记录
-     ********************/
-    private void creatAudioRecord() {
-        // 获取音频文件路径
-        rawAudioName = AudioFileFunc.getRawFilePath();
         ripeAudioName = AudioFileFunc.getWavFilePath();
-
-        // 获得缓冲区字节大小
-        bufferSizeInBytes = AudioRecord.getMinBufferSize(AudioFileFunc.AUDIO_SAMPLE_RATE,
-                AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT);
-
-        // 创建AudioRecord对象
-        audioRecord = new AudioRecord(AudioFileFunc.AUDIO_INPUT, AudioFileFunc.AUDIO_SAMPLE_RATE,
-                AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT, bufferSizeInBytes);
-
+        return AudioFileFunc.getFileSize(ripeAudioName);
     }
 
     /********************
@@ -120,7 +123,10 @@ public class AudioRecordFunc {
             readsize = audioRecord.read(audiodata, 0, bufferSizeInBytes);
             if (AudioRecord.ERROR_INVALID_OPERATION != readsize && fos!=null) {
                 try {
+                    // TODO 对数据进行处理
                     fos.write(audiodata);
+
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
