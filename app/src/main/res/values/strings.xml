@@ -2,6 +2,10 @@
     <string name="app_name">IOT-project2</string>
     <string name="hello_world">感知与定位</string>
 
+    <string name="txt_info_text">准备就绪</string>
+    <string name="btn_record_text">录音</string>
+    <string name="btn_stop_text">停止</string>
+    <string name="btn_play_text">播放</string>
 
     <string name="info_recording">【正在录音】已录制：%1$d s</string>
     <string name="info_playing">【正在播放】播放文件：%1$s\n文件大小：%2$d 字节</string>
