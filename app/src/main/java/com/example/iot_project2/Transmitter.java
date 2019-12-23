@@ -26,13 +26,33 @@ public class Transmitter {
 
     public byte[] generate_signal() {
         double[] t = new double[sample_num];
-        for (int i = 0; i < sample_num; i++) t[i] = i * ((double)1 / fs);
+
+        // 对应 t = [0:1/fs:T];
+        double sample_period = (double)1 / fs;
+        for (int i = 0; i < sample_num; i++) {
+            t[i] = i * sample_period;
+        }
+
+        // 对应 data = chirp(t, f0, T, f1, 'linear');
         double[] chirp = Chirp.chirp(t, f0, T, f1);
 
+        // 对应
+        // output = [];
+        // for i = 1:chirp_num
+        //     output = [output, data, zeros(1,sample_num)];
+        // end
         double[] message = new double[sample_num * 2 * chirp_num];
         for (int i = 0; i < chirp_num; i++) {
-            for (int j = 0; j < sample_num; j++) message[i * 2 * sample_num + j] = chirp[j];
-            for (int j = sample_num; j < 2 * sample_num; j++) message[i * 2 * sample_num + j] = 0;
+
+            // chirp信号
+            for (int j = 0; j < sample_num; j++) {
+                message[i * 2 * sample_num + j] = chirp[j];
+            }
+
+            // chirp信号后的空白
+            for (int j = sample_num; j < 2 * sample_num; j++) {
+                message[i * 2 * sample_num + j] = 0;
+            }
         }
         return doubles2bytes(message);
     }

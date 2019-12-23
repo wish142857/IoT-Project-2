@@ -8,7 +8,7 @@ import android.os.Environment;
 public class AudioFileFunc {
 
     public final static int AUDIO_INPUT = MediaRecorder.AudioSource.MIC;    //音频输入-麦克风
-    public final static int AUDIO_SAMPLE_RATE = 44100;                      // 采样频率-44.1KHz
+    public final static int AUDIO_SAMPLE_RATE = Configuration.SamplingRate;                      // 采样频率-44.1KHz
     //录音输出文件
     private final static String AUDIO_RAW_FILENAME = "RawAudio.raw";
     private final static String AUDIO_WAV_FILENAME = "FinalAudio.wav";

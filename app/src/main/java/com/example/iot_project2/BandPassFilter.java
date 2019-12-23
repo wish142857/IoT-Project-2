@@ -1,5 +1,9 @@
 package com.example.iot_project2;
 
+
+/********************
+ * matlab 中的bandpass和filter函数
+ ********************/
 public class BandPassFilter {
     private int center_freq;
     private int offset_freq;
@@ -23,9 +27,13 @@ public class BandPassFilter {
 
         h = new double[M + 1];
         for (int k = 0; k <= M; k++) {
-            if (k - M / 2 == 0) h[k] = (Wp2 - Wp1) / Math.PI;
-            else h[k] = Wp2 * Math.sin(Wp2 * (k - M / 2)) / (Math.PI * (Wp2 * (k - M / 2))) -
-                    Wp1 * Math.sin(Wp1 * (k - M / 2)) / (Math.PI * (Wp1 * (k - M / 2)));
+            if (k - M / 2 == 0) {
+                h[k] = (Wp2 - Wp1) / Math.PI;
+            }
+            else {
+                h[k] = Wp2 * Math.sin(Wp2 * (k - M / 2)) / (Math.PI * (Wp2 * (k - M / 2))) -
+                        Wp1 * Math.sin(Wp1 * (k - M / 2)) / (Math.PI * (Wp1 * (k - M / 2)));
+            }
         }
     }
 

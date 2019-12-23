@@ -23,26 +23,12 @@ public class FMCW {
         pseudo_T = Chirp.chirp(t, f0, T, f1);
     }
 
-    public double delta_dis(double[] input) {
-        if (input.length != sample_num)
-            throw new RuntimeException("input data length wrong!");
-
-        // 点乘 计算FFT
-        Complex[] s = new Complex[fft_len];
-        for (int i = 0; i < fft_len && i < sample_num; i++)
-            s[i] = new Complex(pseudo_T[i] * input[i], 0);
-        for (int i = sample_num; i < fft_len; i++)
-            s[i] = new Complex(0, 0);
-
-        return cal_delta(s);
-    }
-
-
     // 30-34 行
     public double delta_dis(double[] input, int start) {
         if (input.length - start < sample_num)
             throw new RuntimeException("input data length wrong!");
 
+        // 点乘 计算FFT
         Complex[] s = new Complex[fft_len];
         for (int i = 0; i < fft_len && i < sample_num; i++)
             s[i] = new Complex(pseudo_T[i] * input[start + i], 0);
@@ -65,6 +51,6 @@ public class FMCW {
                 max_ind = i;
             }
         }
-        return max_ind * fs * c * T / (f1 - f0) / fft_len;
+        return max_ind * T * c / (f1 - f0) / fft_len * fs ;
     }
 }
