@@ -45,11 +45,13 @@ public class AudioRecordFunc {
 
         // 获得缓冲区字节大小
         bufferSizeInBytes = AudioRecord.getMinBufferSize(AudioFileFunc.AUDIO_SAMPLE_RATE,
-                AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT);
+                AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+
+        bufferSizeInBytes *= 3;
 
         // 创建AudioRecord对象
         audioRecord = new AudioRecord(AudioFileFunc.AUDIO_INPUT, AudioFileFunc.AUDIO_SAMPLE_RATE,
-                AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT, bufferSizeInBytes);
+                AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSizeInBytes * 50);
 
     }
 
@@ -145,6 +147,7 @@ public class AudioRecordFunc {
                     if (start_position > 0) {
                         while  (start_position + Configuration.SampleNum * 2 <= input.length) {
                             double distance = receiver.calculate_distance(input, start_position);
+                            Log.v("fuck", String.format("%5f",distance));
                             // TODO 绘图
 
                             start_position += Configuration.SampleNum * 2;

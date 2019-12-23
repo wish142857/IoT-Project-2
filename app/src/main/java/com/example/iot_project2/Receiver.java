@@ -1,5 +1,7 @@
 package com.example.iot_project2;
 
+import android.util.Log;
+
 public class Receiver {
     private BandPassFilter bandPassFilter;
     private FMCW fmcw;
@@ -55,7 +57,7 @@ public class Receiver {
             pos = i;
         }
 
-        // Log.i("XCORR", String.format("max corr is: %.3f", max));
+        Log.i("XCORR", String.format("max corr is: %.3f", max));
         if (max > Configuration.StartThreshold && pos >= 20) return pos - 20;
         else return -1;
     }
