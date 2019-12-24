@@ -11,7 +11,7 @@ public class Transmitter {
     int f0 = Configuration.StartFreq;
     int f1 = Configuration.EndFreq;
     double T = Configuration.T;
-    int chirp_num = 100;
+    int chirp_num = 1000;
 
     public byte[] doubles2bytes(double[] ds) {
         byte[] ans = new byte[2 * ds.length];
@@ -70,7 +70,7 @@ public class Transmitter {
 
         int channels = 1;
         //每分钟录到的数据的字节数
-        long byteRate = 16 * fs * channels / 8;
+        long byteRate = 2 * fs * channels;
 
 
         try {

@@ -29,36 +29,53 @@ public class Receiver {
     }
 
     public double calculate_distance(double[] input, int start_pos) {
-        return fmcw.delta_dis(input, start_pos);
+        return fmcw.calculate_distance(input, start_pos);
     }
 
+
+    /********************
+     * xcorr 为matlab中的互相关函数，不同的是两段长度不一样
+     ********************/
     public double[] xcorr(double[] input, double[] target) {
-        double[] xcorr_result = new double[input.length];
-        for (int i = 0; i < input.length; ++i) {
+        int input_length = input.length;
+        double[] xcorr_result = new double[input_length];
+        for (int i = 0; i < input_length; ++i) {
             xcorr_result[i] = 0;
-            for (int j = 0; j < target.length && j < input.length - i; ++j) {
+            for (int j = 0; j < target.length && j < input_length - i; ++j) {
                 xcorr_result[i] += input[i + j] * target[j];
             }
         }
         return xcorr_result;
     }
 
+    /********************
+     * 利用xcorr 识别信号的开始位置
+     ********************/
     public int find_start_position(double[] input) {
         double[] t = new double[Configuration.SampleNum];
-        for (int i = 0; i < Configuration.SampleNum; i++) t[i] = ((double)i / Configuration.SamplingRate);
+        double sample_period = (double)1 / Configuration.SamplingRate;
+        for (int i = 0; i < Configuration.SampleNum; i++) {
+            t[i] = i * sample_period;
+        }
         double[] chirp = Chirp.chirp(t, Configuration.StartFreq, Configuration.T, Configuration.EndFreq);
 
         double[] xcorr_result = xcorr(input, chirp);
 
         double max = 0;
         int pos = -1;
-        for (int i = 0; i < xcorr_result.length; i++) if (xcorr_result[i] > max) {
-            max = xcorr_result[i];
-            pos = i;
+        for (int i = 0; i < xcorr_result.length; i++) {
+            if (xcorr_result[i] > max) {
+                max = xcorr_result[i];
+                pos = i;
+            }
         }
 
         Log.i("XCORR", String.format("max corr is: %.3f", max));
-        if (max > Configuration.StartThreshold && pos >= 20) return pos - 20;
-        else return -1;
+        if (max > Configuration.StartThreshold && pos >= 20) {
+            return pos - 20;
+        }
+        else {
+            return -1;
+        }
     }
 }

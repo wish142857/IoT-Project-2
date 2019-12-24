@@ -9,6 +9,7 @@ public class FMCW {
     private double[] pseudo_T;
     private int fft_len = Configuration.FMCW_FFTLen;
     private int c = Configuration.SoundSpeed;
+    private int start_idx = 0;
 
 
     // 1-7 行
@@ -19,38 +20,45 @@ public class FMCW {
         f1 = end_freq;
         sample_num = 1 + (int)(T * fs);
         double[] t = new double[sample_num];
-        for (int i = 0; i < sample_num; i++) t[i] = i * ((double)1 / fs);
+        double sample_period = (double)1 / fs;
+        for (int i = 0; i < sample_num; i++) {
+            t[i] = i * sample_period;
+        }
         pseudo_T = Chirp.chirp(t, f0, T, f1);
     }
 
     // 30-34 行
-    public double delta_dis(double[] input, int start) {
+    public double calculate_distance(double[] input, int start) {
         if (input.length - start < sample_num)
             throw new RuntimeException("input data length wrong!");
 
-        // 点乘 计算FFT
+        // 对应 s = pseudo_T.*mydata';
         Complex[] s = new Complex[fft_len];
         for (int i = 0; i < fft_len && i < sample_num; i++)
             s[i] = new Complex(pseudo_T[i] * input[start + i], 0);
         for (int i = sample_num; i < fft_len; i++)
             s[i] = new Complex(0, 0);
 
-        return cal_delta(s);
-    }
-
-    // 44-54 行
-    private double cal_delta(Complex[] s) {
-        // 计算频率偏移
+        // 对应 FFT_out = abs(fft(s(i:i+len/2),fftlen));
         Complex[] FFT_out = FastFourierTransform.fft(s);
-        double max_delta = 0;
-        int max_ind = -1;
+        double max_fft = 0;
+        int idx = -1;
+
+        // 对应
+        // [~, idx] = max(abs(FFT_out(1:round(fftlen/2))));
+        // idxs(round((i-start)/len)+1) = idx;
         for (int i = 0; i < fft_len / 2; i++){
-            double delta = FFT_out[i].abs();
-            if (delta > max_delta) {
-                max_delta = delta;
-                max_ind = i;
+            double fft = FFT_out[i].abs();
+            if (fft > max_fft) {
+                max_fft = fft;
+                idx = i;
             }
         }
-        return max_ind * T * c / (f1 - f0) / fft_len * fs ;
+
+        // 对应
+        // start_idx = 0;
+        // delta_distance = (idxs-start_idx)*fs/fftlen*340*T/(f1-f0);
+        return (idx - start_idx) * T * c / (f1 - f0) / fft_len * fs ;
     }
+
 }

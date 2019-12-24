@@ -128,6 +128,7 @@ public class AudioRecordFunc {
         boolean found_signal = false; // 是否已经找到信号
         int tail = 0;
 
+        int round = 0;
 
         while (isRecord) {
             readsize = audioRecord.read(audiodata, 0, bufferSizeInBytes);
@@ -148,15 +149,21 @@ public class AudioRecordFunc {
                         }
                     }
                     if (start_position > 0) {
+
+
                         while  (start_position + Configuration.SampleNum * 2 <= input.length) {
                             double distance = receiver.calculate_distance(input, start_position);
                             Log.v("distance", String.format("%5f",distance));
                             // TODO 绘图
-                            LineChartManager.updateLineChart(distance);
+                            if (round % 5 == 0) {
+                                LineChartManager.updateLineChart(distance);
+                            }
+
 
                             start_position += Configuration.SampleNum * 2;
                         }
                         tail = input.length - start_position;
+                        round += 1;
 
                     }
 
