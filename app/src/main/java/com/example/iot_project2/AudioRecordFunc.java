@@ -134,7 +134,7 @@ public class AudioRecordFunc {
         int tail = 0;
 
         int round = 0;
-        int max_round = 1000;
+        int max_round = 2000;
         double[] experiment_data = new double[max_round];
 
         while (isRecord) {
