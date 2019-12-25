@@ -31,7 +31,6 @@ public class MainActivity extends Activity {
 
     private LineData lineData;           // 折线图数据
     private int index;                   // 折线图点索引
-    private double loaction;             // 当前位置
 
     /********************
      *  初始化创建
@@ -227,7 +226,6 @@ public class MainActivity extends Activity {
         lineChart.notifyDataSetChanged();
         lineChart.invalidate();
         index = 0;
-        loaction = 0;
     }
 
     /********************
@@ -235,12 +233,11 @@ public class MainActivity extends Activity {
      ********************/
     public void updateLineChart(double movement) {
         Toast.makeText(MainActivity.this,"UPDATE" ,Toast.LENGTH_SHORT).show();
-        lineData.addEntry(new Entry(index, (float) movement), 0);
+        lineData.addEntry(new Entry(index * 2 * (float)Configuration.T, (float) movement), 0);
         lineData.notifyDataChanged();
         lineChart.notifyDataSetChanged();
         lineChart.invalidate();
         index ++;
-        loaction += movement;
     }
 
     /********************

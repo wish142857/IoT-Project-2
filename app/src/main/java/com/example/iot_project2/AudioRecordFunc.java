@@ -162,7 +162,7 @@ public class AudioRecordFunc {
                             double distance = receiver.calculate_distance(input, start_position);
                             Log.v("distance", String.format("%5f",distance));
                             // TODO 绘图
-                            if (round % 2 == 0) {
+                            if (round % 1 == 0) {
                                 LineChartManager.updateLineChart(distance);
                             }
                             if (round < max_round) {
