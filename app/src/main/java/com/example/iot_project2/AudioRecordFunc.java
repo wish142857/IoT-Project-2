@@ -3,6 +3,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.Writer;
 import java.io.IOException;
 
 import android.media.AudioFormat;
@@ -129,6 +131,8 @@ public class AudioRecordFunc {
         int tail = 0;
 
         int round = 0;
+        int max_round = 1000;
+        double[] experiment_data = new double[max_round];
 
         while (isRecord) {
             readsize = audioRecord.read(audiodata, 0, bufferSizeInBytes);
@@ -158,6 +162,9 @@ public class AudioRecordFunc {
                             if (round % 5 == 0) {
                                 LineChartManager.updateLineChart(distance);
                             }
+                            if (round < max_round) {
+                                experiment_data[round] = distance;
+                            }
 
 
                             start_position += Configuration.SampleNum * 2;
@@ -176,6 +183,18 @@ public class AudioRecordFunc {
             }
         }
         try {
+            File file =new File(AudioFileFunc.getTxtFilePath());
+            Writer out =new FileWriter(file);
+            if (round > max_round) {
+                round = max_round;
+            }
+            for (int i = 0; i < round; i++) {
+                out.write(String.valueOf(round));
+            }
+
+            out.close();
+
+
             if(fos != null)
                 fos.close();// 关闭写入流
         } catch (IOException e) {

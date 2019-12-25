@@ -12,6 +12,7 @@ public class AudioFileFunc {
     //录音输出文件
     private final static String AUDIO_RAW_FILENAME = "RawAudio.raw";
     private final static String AUDIO_WAV_FILENAME = "FinalAudio.wav";
+    private final static String RESULT_FILENAME = "Result.txt";
 
 
     /********************
@@ -43,6 +44,18 @@ public class AudioFileFunc {
             mAudioWavPath = fileBasePath+"/"+AUDIO_WAV_FILENAME;
         }
         return mAudioWavPath;
+    }
+
+    /********************
+     * 获取 TxtFile 路径
+     ********************/
+    public static String getTxtFilePath(){
+        String TxtPath = "";
+        if(isSdcardExit()){
+            String fileBasePath = Environment.getExternalStorageDirectory().getAbsolutePath();
+            TxtPath = fileBasePath+"/"+RESULT_FILENAME;
+        }
+        return TxtPath;
     }
 
     /********************
