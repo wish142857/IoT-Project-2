@@ -26,7 +26,10 @@ public class AudioRecordFunc {
      * 构造方法
      ********************/
     private AudioRecordFunc() {
-        receiver = new Receiver();
+
+        receiver = new Receiver(Configuration.SamplingRate, Configuration.StartFreq,
+                Configuration.EndFreq, Configuration.BandPassCenter, Configuration.BandPassOffset,
+                Configuration.T, Configuration.StartThreshold, Configuration.SampleNum);
     }
 
     /********************

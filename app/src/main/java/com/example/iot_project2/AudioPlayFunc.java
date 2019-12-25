@@ -35,7 +35,7 @@ public class AudioPlayFunc {
      * 加载音频文件
      ********************/
     private void loadAudioFile() {
-        transmitter.write_result(AudioFileFunc.getWavFilePath());
+        transmitter.write_signal_to_file(AudioFileFunc.getWavFilePath());
         // 获取音频文件路径
         ripeAudioName = AudioFileFunc.getWavFilePath();
         // 设置播放数据源

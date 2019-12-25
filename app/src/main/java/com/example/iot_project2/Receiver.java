@@ -3,40 +3,47 @@ package com.example.iot_project2;
 import android.util.Log;
 
 public class Receiver {
-    private BandPassFilter bandPassFilter;
+    private int sample_rate;
+    private double T;
+    private int start_freq;
+    private int end_freq;
+    private int start_threshold;
+    private int sample_num;
+    private BandPassFilter band_pass_filter;
     private FMCW fmcw;
-    // private double[] filtered_sound;
 
-    public Receiver() {
-        bandPassFilter = new BandPassFilter(Configuration.BandPassCenter, Configuration.BandPassOffset, Configuration.SamplingRate);
-        fmcw = new FMCW(Configuration.SamplingRate, Configuration.T, Configuration.StartFreq, Configuration.EndFreq);
+    public Receiver(int sample_rate_, int start_freq_, int end_freq_, int freq_center_,
+                    int freq_offset_, double T_, int start_threshold_, int sample_num_) {
+        sample_rate = sample_rate_;
+        T = T_;
+        start_freq = start_freq_;
+        end_freq = end_freq_;
+        start_threshold = start_threshold_;
+        sample_num = sample_num_;
+        band_pass_filter = new BandPassFilter(freq_center_, freq_offset_, sample_rate);
+        fmcw = new FMCW(sample_rate, start_freq, end_freq, T);
     }
 
+    /********************
+     * 由raw的音频数据转化为double类型再滤波
+     ********************/
     public double[] convert_and_filter(byte[] buffer, int byte_num) {
-        double[] doubles = new double[byte_num / 2];
-        for (int i = 0; i < doubles.length; i++) {
-            byte bl = buffer[2 * i];
-            byte bh = buffer[2 * i + 1];
 
-            short s = (short) ((bh & 0x00FF) << 8 | bl & 0x00FF);
-            doubles[i] = s / 32768f;
-        }
-        return bandPassFilter.filter(doubles);
+        return band_pass_filter.filter(DoubleByteConvert.byte2double(buffer, byte_num));
     }
 
-    public double[] convert_and_filter(byte[] buffer) {
-        return convert_and_filter(buffer, buffer.length);
-    }
-
+    /********************
+     * 由FMCW机制计算距离
+     ********************/
     public double calculate_distance(double[] input, int start_pos) {
         return fmcw.calculate_distance(input, start_pos);
     }
 
 
     /********************
-     * xcorr 为matlab中的互相关函数，不同的是两段长度不一样
+     * xcorr为matlab中的互相关函数，不同的是两段长度不一样
      ********************/
-    public double[] xcorr(double[] input, double[] target) {
+    private double[] xcorr(double[] input, double[] target) {
         int input_length = input.length;
         double[] xcorr_result = new double[input_length];
         for (int i = 0; i < input_length; ++i) {
@@ -49,15 +56,15 @@ public class Receiver {
     }
 
     /********************
-     * 利用xcorr 识别信号的开始位置
+     * 利用xcorr识别信号的开始位置
      ********************/
     public int find_start_position(double[] input) {
-        double[] t = new double[Configuration.SampleNum];
-        double sample_period = (double)1 / Configuration.SamplingRate;
-        for (int i = 0; i < Configuration.SampleNum; i++) {
+        double[] t = new double[sample_num];
+        double sample_period = (double)1 / sample_rate;
+        for (int i = 0; i < sample_num; i++) {
             t[i] = i * sample_period;
         }
-        double[] chirp = Chirp.chirp(t, Configuration.StartFreq, Configuration.T, Configuration.EndFreq);
+        double[] chirp = Chirp.chirp(t, start_freq, T, end_freq);
 
         double[] xcorr_result = xcorr(input, chirp);
 
@@ -71,7 +78,7 @@ public class Receiver {
         }
 
         Log.i("XCORR", String.format("max corr is: %.3f", max));
-        if (max > Configuration.StartThreshold && pos >= 20) {
+        if (max > start_threshold && pos >= 20) {
             return pos - 20;
         }
         else {

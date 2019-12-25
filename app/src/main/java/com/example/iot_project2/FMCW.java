@@ -13,12 +13,12 @@ public class FMCW {
 
 
     // 1-7 行
-    public FMCW(int sample_freq, double chirp_T, int start_freq, int end_freq) {
-        fs = sample_freq;
-        T = chirp_T;
+    public FMCW(int sample_rate, int start_freq, int end_freq, double T_) {
+        fs = sample_rate;
+        T = T_;
         f0 = start_freq;
         f1 = end_freq;
-        sample_num = 1 + (int)(T * fs);
+        sample_num = (int)(T * fs) + 1;
         double[] t = new double[sample_num];
         double sample_period = (double)1 / fs;
         for (int i = 0; i < sample_num; i++) {

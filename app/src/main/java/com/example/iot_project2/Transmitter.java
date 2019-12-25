@@ -13,18 +13,8 @@ public class Transmitter {
     double T = Configuration.T;
     int chirp_num = 1000;
 
-    public byte[] doubles2bytes(double[] ds) {
-        byte[] ans = new byte[2 * ds.length];
-        int idx = 0;
-        for (final double dval: ds) {
-            final short val = (short)(dval * 32767);
-            ans[idx++] = (byte)(val & 0x00ff);
-            ans[idx++] = (byte)((val & 0xff00) >>> 8);
-        }
-        return ans;
-    }
 
-    public byte[] generate_signal() {
+    private byte[] generate_signal() {
         double[] t = new double[sample_num];
 
         // 对应 t = [0:1/fs:T];
@@ -54,10 +44,10 @@ public class Transmitter {
                 message[i * 2 * sample_num + j] = 0;
             }
         }
-        return doubles2bytes(message);
+        return DoubleByteConvert.double2byte(message, message.length);
     }
 
-    public void write_result(String file_name) {
+    public void write_signal_to_file(String file_name) {
         File file = new File(file_name);
         if (file.exists()) {
             file.delete();
@@ -68,7 +58,8 @@ public class Transmitter {
 
         byte[] input = generate_signal();
 
-        int channels = 1;
+        int channels = 1;  // 单声道
+
         //每分钟录到的数据的字节数
         long byteRate = 2 * fs * channels;
 
