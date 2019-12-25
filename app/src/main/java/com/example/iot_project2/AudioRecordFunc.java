@@ -162,18 +162,19 @@ public class AudioRecordFunc {
                             double distance = receiver.calculate_distance(input, start_position);
                             Log.v("distance", String.format("%5f",distance));
                             // TODO 绘图
-                            if (round % 5 == 0) {
+                            if (round % 2 == 0) {
                                 LineChartManager.updateLineChart(distance);
                             }
                             if (round < max_round) {
                                 experiment_data[round] = distance;
                             }
 
+                            round += 1;
 
                             start_position += Configuration.SampleNum * 2;
                         }
                         tail = input.length - start_position;
-                        round += 1;
+
 
                     }
 
@@ -186,13 +187,15 @@ public class AudioRecordFunc {
             }
         }
         try {
-            File file =new File(AudioFileFunc.getTxtFilePath());
-            Writer out =new FileWriter(file);
+            File file = new File(AudioFileFunc.getTxtFilePath());
+            Writer out = new FileWriter(file);
             if (round > max_round) {
                 round = max_round;
             }
             for (int i = 0; i < round; i++) {
-                out.write(String.valueOf(round));
+
+                out.write(String.valueOf(experiment_data[i]));
+                out.write("\n");
             }
 
             out.close();
