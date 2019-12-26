@@ -4,7 +4,7 @@ import android.util.Log;
 
 
 /********************
- * 将滤波、找开始位置、计算距离封装到一个类中，将在录音函数中使用
+ * 将滤波、找开始位置、计算距离封装到一个类中，作为接收信号类，其将在录音函数中使用
  ********************/
 public class Receiver {
     private int sample_rate;
@@ -83,11 +83,10 @@ public class Receiver {
 
         Log.i("xcorr", String.format("%.4f", max_xcorr));
 
-        // 25是一个经验值，
+        // 25是一个经验值，将计算得到的开始位置提前一点效果更好
         if (max_xcorr > xcorr_thresh && pos >= 25) {
             return pos - 25;
-        }
-        else {
+        } else {
             return -1;
         }
     }

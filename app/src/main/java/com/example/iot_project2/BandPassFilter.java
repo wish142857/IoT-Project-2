@@ -16,8 +16,6 @@ public class BandPassFilter {
         this.center_freq = center_freq_;
         this.offset_freq = offset_freq_;
         this.sample_freq = sample_freq_;
-        double AP = 0.82; // 通带衰减
-        double As = 45.0; // 阻带衰减
         double Wp1 = 2 * Math.PI * (center_freq - offset_freq) / sample_freq;
         double Wp2 = 2 * Math.PI * (center_freq + offset_freq) / sample_freq;
 
@@ -37,8 +35,8 @@ public class BandPassFilter {
         }
     }
 
+    // 简单的matlab filter功能
     public double[] filter(double[] input) {
-        // The filter in band pass uses matlab filter as `filter(h, 1, input)`
         int len = input.length;
         double[] output = new double[len];
         for (int i = 0; i < len; i++) {

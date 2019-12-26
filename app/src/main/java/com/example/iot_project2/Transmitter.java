@@ -5,6 +5,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import android.util.Log;
 
+
+/********************
+ * 生成发射信号类
+ ********************/
 public class Transmitter {
     int sample_num = Global.SampleNum;
     int fs = Global.SamplingRate;
