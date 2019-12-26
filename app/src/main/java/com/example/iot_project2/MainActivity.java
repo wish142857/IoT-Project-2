@@ -234,7 +234,7 @@ public class MainActivity extends Activity {
      ********************/
     public void updateLineChart(double movement) {
         Toast.makeText(MainActivity.this,"UPDATE" ,Toast.LENGTH_SHORT).show();
-        lineData.addEntry(new Entry(index * 4 * (float)Configuration.T, (float) movement), 0);
+        lineData.addEntry(new Entry(index * 4 * (float)Global.T, (float) movement), 0);
         lineData.notifyDataChanged();
         lineChart.notifyDataSetChanged();
         lineChart.invalidate();

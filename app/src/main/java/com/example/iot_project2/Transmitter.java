@@ -6,12 +6,12 @@ import java.io.IOException;
 import android.util.Log;
 
 public class Transmitter {
-    int sample_num = Configuration.SampleNum;
-    int fs = Configuration.SamplingRate;
-    int f0 = Configuration.StartFreq;
-    int f1 = Configuration.EndFreq;
-    double T = Configuration.T;
-    int chirp_num = 1000;
+    int sample_num = Global.SampleNum;
+    int fs = Global.SamplingRate;
+    int f0 = Global.StartFreq;
+    int f1 = Global.EndFreq;
+    double T = Global.T;
+    int chirp_num = 1000; // 一次产生1000个chirp
 
 
     private byte[] generate_signal() {
@@ -61,13 +61,13 @@ public class Transmitter {
         int channels = 1;  // 单声道
 
         //每分钟录到的数据的字节数
-        long byteRate = 2 * fs * channels;
+        long byte_rate = 2 * fs * channels;
 
 
         try {
             FileOutputStream os = new FileOutputStream(file);
             int audio_len = input.length;
-            AudioRecordFunc.WriteWaveFileHeader(os, audio_len, audio_len + 36, fs, channels, byteRate);
+            AudioRecordFunc.WriteWaveFileHeader(os, audio_len, audio_len + 36, fs, channels, byte_rate);
             os.write(input);
             os.close();
         } catch (Throwable t){

@@ -27,9 +27,9 @@ public class AudioRecordFunc {
      ********************/
     private AudioRecordFunc() {
 
-        receiver = new Receiver(Configuration.SamplingRate, Configuration.StartFreq,
-                Configuration.EndFreq, Configuration.BandPassCenter, Configuration.BandPassOffset,
-                Configuration.T, Configuration.StartThreshold, Configuration.SampleNum);
+        receiver = new Receiver(Global.SamplingRate, Global.StartFreq,
+                Global.EndFreq, Global.BandPassCenter, Global.BandPassOffset,
+                Global.T, Global.XcorrThresh, Global.SampleNum);
     }
 
     /********************
@@ -131,24 +131,27 @@ public class AudioRecordFunc {
         }
 
         boolean found_signal = false; // 是否已经找到信号
-        int tail = 0;
+        int double_sample_num = 2 * Global.SampleNum; // 一个chirp和其后空白信号的长度之和
+        int tail = 0; // 已经找到信号后，buffer大小可能不是double_sample_num的整数倍，因此需要记录剩余长度
 
-        int round = 0;
-        int max_round = 2000;
-        double[] experiment_data = new double[max_round];
+        int round = 0; // 当前追踪轮数
+        int max_round = 2000; // 最多存储2000轮
+        double[] experiment_data = new double[max_round]; // 存储实验数据
 
         while (isRecord) {
+            // 从buffer读入一段音频
             readsize = audioRecord.read(audiodata, 0, bufferSizeInBytes);
             if (AudioRecord.ERROR_INVALID_OPERATION != readsize &&
                     readsize != AudioRecord.ERROR_BAD_VALUE && readsize != 0 &&
                     readsize != -1 && fos!=null) {
                 try {
-                    // TODO 对数据进行处理
+                    // 滤波
                     double[] input = receiver.convert_and_filter(audiodata, readsize);
 
+                    // 如果没有找到开始位置，则用find_start_position寻找，否则直接按上次剩余长度推算
                     int start_position;
                     if (found_signal) {
-                        start_position = 2 * Configuration.SampleNum - tail;
+                        start_position = double_sample_num - tail;
                     } else {
                         start_position = receiver.find_start_position(input);
                         if (start_position > 0) {
@@ -158,10 +161,9 @@ public class AudioRecordFunc {
                     if (start_position > 0) {
 
 
-                        while  (start_position + Configuration.SampleNum * 2 <= input.length) {
+                        while  (start_position + double_sample_num <= input.length) {
                             double distance = receiver.calculate_distance(input, start_position);
                             Log.v("distance", String.format("%5f",distance));
-                            // TODO 绘图
                             if (round % 1 == 0) {
                                 LineChartManager.updateLineChart(distance);
                             }
@@ -171,22 +173,18 @@ public class AudioRecordFunc {
 
                             round += 1;
 
-                            start_position += Configuration.SampleNum * 2;
+                            start_position += double_sample_num;
                         }
                         tail = input.length - start_position;
-
-
                     }
-
                     fos.write(audiodata);
-
-
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }
         try {
+            // 将结果写入文件
             File file = new File(AudioFileFunc.getTxtFilePath());
             Writer out = new FileWriter(file);
             if (round > max_round) {

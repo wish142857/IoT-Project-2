@@ -2,23 +2,27 @@ package com.example.iot_project2;
 
 import android.util.Log;
 
+
+/********************
+ * 将滤波、找开始位置、计算距离封装到一个类中，将在录音函数中使用
+ ********************/
 public class Receiver {
     private int sample_rate;
     private double T;
     private int start_freq;
     private int end_freq;
-    private int start_threshold;
+    private int xcorr_thresh;
     private int sample_num;
     private BandPassFilter band_pass_filter;
     private FMCW fmcw;
 
     public Receiver(int sample_rate_, int start_freq_, int end_freq_, int freq_center_,
-                    int freq_offset_, double T_, int start_threshold_, int sample_num_) {
+                    int freq_offset_, double T_, int xcorr_thresh_, int sample_num_) {
         sample_rate = sample_rate_;
         T = T_;
         start_freq = start_freq_;
         end_freq = end_freq_;
-        start_threshold = start_threshold_;
+        xcorr_thresh = xcorr_thresh_;
         sample_num = sample_num_;
         band_pass_filter = new BandPassFilter(freq_center_, freq_offset_, sample_rate);
         fmcw = new FMCW(sample_rate, start_freq, end_freq, T);
@@ -43,7 +47,7 @@ public class Receiver {
     /********************
      * xcorr为matlab中的互相关函数，不同的是两段长度不一样
      ********************/
-    private double[] xcorr(double[] input, double[] target) {
+    private double[] calculate_xcorr(double[] input, double[] target) {
         int input_length = input.length;
         double[] xcorr_result = new double[input_length];
         for (int i = 0; i < input_length; ++i) {
@@ -66,20 +70,22 @@ public class Receiver {
         }
         double[] chirp = Chirp.chirp(t, start_freq, T, end_freq);
 
-        double[] xcorr_result = xcorr(input, chirp);
+        double[] xcorr = calculate_xcorr(input, chirp);
 
-        double max = 0;
+        double max_xcorr = 0;
         int pos = -1;
-        for (int i = 0; i < xcorr_result.length; i++) {
-            if (xcorr_result[i] > max) {
-                max = xcorr_result[i];
+        for (int i = 0; i < xcorr.length; i++) {
+            if (xcorr[i] > max_xcorr) {
+                max_xcorr = xcorr[i];
                 pos = i;
             }
         }
 
-        Log.i("XCORR", String.format("max corr is: %.3f", max));
-        if (max > start_threshold && pos >= 20) {
-            return pos - 20;
+        Log.i("xcorr", String.format("%.4f", max_xcorr));
+
+        // 25是一个经验值，
+        if (max_xcorr > xcorr_thresh && pos >= 25) {
+            return pos - 25;
         }
         else {
             return -1;

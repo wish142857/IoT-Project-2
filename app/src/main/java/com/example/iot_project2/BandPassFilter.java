@@ -2,7 +2,7 @@ package com.example.iot_project2;
 
 
 /********************
- * matlab 中的bandpass和filter函数, java实现参考学长代码
+ * matlab 中的bandpass和filter函数, java实现参考了学长的代码
  ********************/
 public class BandPassFilter {
     private int center_freq;
@@ -12,10 +12,10 @@ public class BandPassFilter {
     private int M;
     private double[] h;
 
-    public BandPassFilter(int centerFreq, int offsetFreq, int sampleFreq) {
-        this.center_freq = centerFreq;
-        this.offset_freq = offsetFreq;
-        this.sample_freq = sampleFreq;
+    public BandPassFilter(int center_freq_, int offset_freq_, int sample_freq_) {
+        this.center_freq = center_freq_;
+        this.offset_freq = offset_freq_;
+        this.sample_freq = sample_freq_;
         double AP = 0.82; // 通带衰减
         double As = 45.0; // 阻带衰减
         double Wp1 = 2 * Math.PI * (center_freq - offset_freq) / sample_freq;

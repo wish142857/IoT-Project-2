@@ -1,5 +1,9 @@
 package com.example.iot_project2;
 
+
+/********************
+ * FMCW算法计算距离的核心部分
+ ********************/
 public class FMCW {
     private int fs;
     private double T;
@@ -7,8 +11,8 @@ public class FMCW {
     private int f1;
     private int sample_num;
     private double[] pseudo_T;
-    private int fft_len = Configuration.FMCW_FFTLen;
-    private int c = Configuration.SoundSpeed;
+    private int fft_len = Global.FFTLen;
+    private int c = Global.SoundSpeed;
     private int start_idx = 0;
 
 
@@ -41,12 +45,13 @@ public class FMCW {
 
         // 对应 FFT_out = abs(fft(s(i:i+len/2),fftlen));
         Complex[] FFT_out = FastFourierTransform.fft(s);
-        double max_fft = 0;
-        int idx = -1;
+
 
         // 对应
         // [~, idx] = max(abs(FFT_out(1:round(fftlen/2))));
         // idxs(round((i-start)/len)+1) = idx;
+        double max_fft = 0;
+        int idx = -1;
         for (int i = 0; i < fft_len / 2; i++){
             double fft = FFT_out[i].abs();
             if (fft > max_fft) {
